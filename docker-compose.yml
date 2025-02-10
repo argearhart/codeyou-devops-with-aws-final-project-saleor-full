@@ -1,0 +1,108 @@
+services:
+  api:
+    image: saleor-api
+    build: 
+      context: ./saleor-api
+      dockerfile: Dockerfile
+    container_name: saleor-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./saleor-api:/app
+      - saleor-media:/app/media
+    environment:
+      ALLOWED_HOSTS: "localhost,api,dashboard"
+      STATIC_URL: "/static/"
+      POETRY_VIRTUALENVS_CREATE: "false"
+    command: ["gunicorn", "--bind", ":8000", "--workers", "4", "--worker-class", "saleor.asgi.gunicorn_worker.UvicornWorker", "saleor.asgi:application"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - saleor-network
+
+  dashboard:
+    image: saleor-dashboard
+    build: 
+      context: ./saleor-dashboard
+      dockerfile: Dockerfile
+    container_name: saleor-dashboard
+    restart: unless-stopped
+    ports:
+      - "9000:80"
+    volumes:
+      - ./saleor-dashboard:/app
+    depends_on:
+      api:
+        condition: service_healthy
+    command: ["nginx", "-g", "daemon off;"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - saleor-network
+  db:
+    image: postgres:15-alpine
+    container_name: saleor-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    volumes:
+      - saleor-db:/var/lib/postgresql/data
+      - ./db-init/replica_user.sql:/docker-entrypoint-initdb.d/replica_user.sql
+    environment:
+      POSTGRES_USER: saleor
+      POSTGRES_PASSWORD: saleorpass
+      POSTGRES_DB: saleor
+    networks:
+      - saleor-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "saleor", "-h", "db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: saleor-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - saleor-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-h", "saleor-redis", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - saleor-network
+
+  
+volumes:
+  saleor-dashboard:
+    name: saleor-dashboard
+    driver: local
+  saleor-db:
+    name: saleor-db
+    driver: local
+  saleor-redis:
+    name: saleor-redis
+    driver: local
+  saleor-media:
+    name: saleor-media
+    driver: local
+
+networks:
+  saleor-network:
+    driver: bridge
