@@ -1,4 +1,6 @@
 FROM python:3.12-slim AS base
+WORKDIR /app 
+
 ARG SECRET_KEY
 ARG STATIC_URL
 
@@ -8,8 +10,6 @@ ENV SECRET_KEY=${SECRET_KEY} \
     PIP_NO_CACHE_DIR=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH="/app" 
-
-WORKDIR /app
 
 # Install required system dependencies
 RUN apt-get update && apt-get install -y \
@@ -34,7 +34,6 @@ RUN apt-get update && apt-get install -y \
     libpq5 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-
 RUN pip install --no-cache-dir --upgrade pip
 
 # Install Poetry
@@ -55,18 +54,9 @@ RUN addgroup --system saleor && adduser --system --ingroup saleor saleor
 RUN chown -R saleor:saleor /app
 USER saleor
 
-WORKDIR /app 
-
 COPY . /app
-
-RUN dos2unix /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-
-
 
 # Expose API port
 EXPOSE 8000
 
-
-ENTRYPOINT ["/entrypoint.sh"]
 CMD ["gunicorn", "--bind", ":8000", "--workers", "4", "--worker-class", "saleor.asgi.gunicorn_worker.UvicornWorker", "saleor.asgi:application"]
