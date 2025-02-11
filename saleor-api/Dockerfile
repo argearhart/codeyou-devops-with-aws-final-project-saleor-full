@@ -50,13 +50,19 @@ RUN poetry install --no-root --no-cache --no-interaction
 RUN poetry run pip install "pywatchman<2.0.0"
 
 
-COPY entrypoint.sh ./entrypoint.sh
-RUN chmod +x ./entrypoint.sh
-
 # Create a non-root user
 RUN addgroup --system saleor && adduser --system --ingroup saleor saleor
 RUN chown -R saleor:saleor /app
 USER saleor
+
+WORKDIR /app 
+
+COPY . /app
+
+RUN dos2unix /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+
 
 # Expose API port
 EXPOSE 8000
