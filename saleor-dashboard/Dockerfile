@@ -1,7 +1,6 @@
 # Builder Stage
 FROM node:18-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 RUN apk add --no-cache bash
 
@@ -43,12 +42,13 @@ RUN npm run build
 FROM nginx:stable-alpine AS runner
 
 # Set working directory
-WORKDIR /usr/share/nginx/html
+WORKDIR /app
 
 # Copy built application from builder stage
 COPY --from=builder /app/build/ .
 COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY ./nginx/replace-env-vars.sh /docker-entrypoint.d/50-replace-env-vars.sh
+
 RUN chmod +x /docker-entrypoint.d/50-replace-env-vars.sh
 
 
