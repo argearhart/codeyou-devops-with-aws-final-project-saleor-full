@@ -5,11 +5,13 @@ ARG SECRET_KEY
 ARG STATIC_URL
 
 ENV SECRET_KEY=${SECRET_KEY} \
-    STATIC_URL=${STATIC_URL} \
+    STATIC_URL=${STATIC_URL:-/static} \
     POETRY_VERSION=1.8.4 \
     PIP_NO_CACHE_DIR=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH="/app" 
+
+WORKDIR /app
 
 # Install required system dependencies
 RUN apt-get update && apt-get install -y \
@@ -49,12 +51,15 @@ RUN poetry install --no-root --no-cache --no-interaction
 RUN poetry run pip install "pywatchman<2.0.0"
 
 
+COPY . /app
+
+RUN SECRET_KEY=dummy STATIC_URL=${STATIC_URL} python3 manage.py collectstatic --no-input
+
 # Create a non-root user
 RUN addgroup --system saleor && adduser --system --ingroup saleor saleor
 RUN chown -R saleor:saleor /app
 USER saleor
 
-COPY . /app
 
 # Expose API port
 EXPOSE 8000
