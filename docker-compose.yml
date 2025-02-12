@@ -19,9 +19,9 @@ services:
       ALLOWED_HOSTS: "localhost,api,dashboard"
       STATIC_URL: "/static/"
       DASHBOARD_URL: http://dashboard:9000 
-      env_file:
-        - common.env
-        - backend.env 
+    env_file:
+      - common.env
+      - backend.env 
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
@@ -68,10 +68,10 @@ services:
     networks:
       - saleor-network
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "saleor", "-h", "lcoalhost"]
+      test: ["CMD", "pg_isready", "-U", "saleor", "-h", "localhost"]
       interval: 30s
-      timeout: 10s
-      retries: 3
+      timeout: 20s
+      retries: 5
 
   redis:
     image: redis:7.0-alpine
