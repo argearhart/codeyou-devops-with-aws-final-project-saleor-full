@@ -14,13 +14,15 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - ./saleor-api:/app
       - saleor-media:/app/media
     environment:
       ALLOWED_HOSTS: "localhost,api,dashboard"
       STATIC_URL: "/static/"
-      POETRY_VIRTUALENVS_CREATE: "false"
-    command: ["gunicorn", "--bind", ":8000", "--workers", "4", "--worker-class", "saleor.asgi.gunicorn_worker.UvicornWorker", "saleor.asgi:application"]
+      DASHBOARD_URL: http://dashboard:9000 
+      env_file:
+        - common.env
+        - backend.env 
+
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
       interval: 30s
@@ -58,8 +60,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - saleor-db:/var/lib/postgresql/data
-      - ./db-init/replica_user.sql:/docker-entrypoint-initdb.d/replica_user.sql
+      - ./replica_user.sql:/docker-entrypoint-initdb.d/replica_user.sql
     environment:
       POSTGRES_USER: saleor
       POSTGRES_PASSWORD: saleorpass
@@ -67,7 +68,7 @@ services:
     networks:
       - saleor-network
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "saleor", "-h", "db"]
+      test: ["CMD", "pg_isready", "-U", "saleor", "-h", "lcoalhost"]
       interval: 30s
       timeout: 10s
       retries: 3
