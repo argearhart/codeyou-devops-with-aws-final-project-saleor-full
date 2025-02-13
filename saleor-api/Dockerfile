@@ -56,9 +56,10 @@ COPY . /app
 RUN SECRET_KEY=dummy STATIC_URL=${STATIC_URL} python3 manage.py collectstatic --no-input
 
 # Create a non-root user
-RUN addgroup --system saleor && adduser --system --ingroup saleor saleor
-RUN chown -R saleor:saleor /app
-USER saleor
+# Delete it or Create the user, give it a UID/GUID of 0 and then do the USER statement
+#RUN addgroup --system saleor && adduser --system --ingroup saleor saleor
+#RUN chown -R saleor:saleor /app
+#USER saleor
 
 
 # Expose API port
