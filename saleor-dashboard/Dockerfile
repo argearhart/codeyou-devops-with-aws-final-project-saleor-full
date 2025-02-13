@@ -10,9 +10,20 @@ COPY package.json package-lock.json ./
 # Install dependencies
 RUN npm ci --legacy-peer-deps
 
-COPY nginx assets locale scripts src .featureFlags \
-    vite.config.js tsconfig.json *.d.ts schema.graphql \
-    introspection.json introspection*.json /app/
+COPY nginx/ /app/nginx/
+COPY assets/ /app/assets/
+COPY locale/ /app/locale/
+COPY scripts/ /app/scripts/
+COPY src/ /app/src/
+COPY .featureFlags/ /app/.featureFlags/
+COPY vite.config.js /app/vite.config.js
+COPY tsconfig.json /app/tsconfig.json
+COPY *.d.ts /app/
+COPY schema.graphql /app/schema.graphql
+COPY introspection.json /app/introspection.json
+COPY introspection*.json /app/
+
+
 
 #Configure Environment Variables
 ARG API_URL
@@ -41,7 +52,7 @@ FROM nginx:stable-alpine AS runner
 WORKDIR /app
 
 # Copy built application from builder stage
-COPY --from=builder /app/build/ .
+COPY --from=builder /app/build/ /app/
 COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY ./nginx/replace-env-vars.sh /docker-entrypoint.d/50-replace-env-vars.sh
 
