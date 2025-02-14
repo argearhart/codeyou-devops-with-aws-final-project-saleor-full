@@ -35,13 +35,21 @@ jobs:
         run: |
           pip-audit  || true
 
+      - name: Set Image Tag 
+        run: echo ::set-env name=IMAGE_TAG::${{ github.sha }}  >> $GITHUB_ENV
+        echo "BRANCH_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+
       - name: Build API Docker Image
         run: |
-          docker build -t argearhart/saleor-api:${{ github.ref_name }} ./saleor-api || true
+          docker build -t argearhart/saleor-api:${{ env.IMAGE_TAG }} ./saleor-api
+          docker tag argearhart/saleor-api:${{ env.IMAGE_TAG }} argearhart/saleor-api:production
+          docker tag argearhart/saleor-api:${{ env.IMAGE_TAG }} argearhart/saleor-api:latest
 
       - name: Build Dashboard Docker Image
         run: |
-          docker build -t argearhart/saleor-dashboard:${{ github.ref_name }} ./saleor-dashboard || true
+          docker build -t argearhart/saleor-dashboard:${{ env.IMAGE_TAG }} ./saleor-dashboard
+          docker tag argearhart/saleor-dashboard:${{ env.IMAGE_TAG }} argearhart/saleor-dashboard:production
+          docker tag argearhart/saleor-dashboard:${{ env.IMAGE_TAG }} argearhart/saleor-dashboard:latest
 
       - name: Trivy Security Scan for API
         run: |
@@ -54,14 +62,18 @@ jobs:
       - name: Push API Image to DockerHub
         if: github.ref_name == 'develop' || github.ref_name == 'staging' || github.ref_name == 'production'
         run: |
-          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "argearhart" --password-stdin
-          docker push argearhart/saleor-api:${{ github.ref_name }}
+          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+          docker push argearhart/saleor-api:${{ env.IMAGE_TAG }}
+          docker push argearhart/saleor-api:production
+          docker push argearhart/saleor-api:latest
 
       - name: Push Dashboard Image to DockerHub
         if: github.ref_name == 'develop' || github.ref_name == 'staging' || github.ref_name == 'production'
         run: |
-          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "argearhart" --password-stdin
-          docker push argearhart/saleor-dashboard:${{ github.ref_name }}
+          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+          docker push argearhart/saleor-dashboard:${{ env.IMAGE_TAG }}
+          docker push argearhart/saleor-dashboard:production
+          docker push argearhart/saleor-dashboard:latest
 
   staging-validation:
     needs: build
