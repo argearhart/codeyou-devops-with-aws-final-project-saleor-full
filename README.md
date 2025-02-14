@@ -103,3 +103,4 @@ If you encounter issues or have suggestions for improvement, please message me o
 Happy deploying! 🚀
 
 Updating readme.md to push - testing github secrets
+500 changes and one time it works but then it doesn't
