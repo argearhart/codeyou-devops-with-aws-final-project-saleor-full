@@ -37,6 +37,10 @@ services:
     build: 
       context: ./saleor-dashboard
       dockerfile: Dockerfile
+      args:
+        API_URI: http://api:8000/graphql/
+        APP_MOUNT_URI: /dashboard/
+        STATIC_URL: /static/
     container_name: saleor-dashboard
     restart: unless-stopped
     ports:
@@ -46,9 +50,13 @@ services:
     depends_on:
       api:
         condition: service_healthy
+    environment:
+      - API_URL=http://api:8000/graphql/
+      - APP_MOUNT_URI=/dashboard/
+      - STATIC_URL=/static/
     command: ["nginx", "-g", "daemon off;"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000"]
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
       interval: 30s
       timeout: 10s
       retries: 3

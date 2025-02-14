@@ -10,19 +10,18 @@ COPY package.json package-lock.json ./
 # Install dependencies
 RUN npm ci --legacy-peer-deps
 
-COPY nginx/ /app/nginx/
-COPY assets/ /app/assets/
-COPY locale/ /app/locale/
-COPY scripts/ /app/scripts/
-COPY src/ /app/src/
-COPY .featureFlags/ /app/.featureFlags/
-COPY vite.config.js /app/vite.config.js
-COPY tsconfig.json /app/tsconfig.json
-COPY *.d.ts /app/
-COPY schema.graphql /app/schema.graphql
-COPY introspection.json /app/introspection.json
-COPY introspection*.json /app/
-
+COPY nginx/ ./nginx/
+COPY assets/ ./assets/
+COPY locale/ ./locale/
+COPY scripts/ ./scripts/
+COPY src/ ./src/
+COPY .featureFlags/ ./.featureFlags/
+COPY vite.config.js ./
+COPY tsconfig.json ./
+COPY *.d.ts ./
+COPY schema.graphql ./
+COPY introspection.json ./
+COPY introspection*.json ./
 
 
 #Configure Environment Variables
@@ -57,7 +56,6 @@ COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY ./nginx/replace-env-vars.sh /docker-entrypoint.d/50-replace-env-vars.sh
 
 RUN chmod +x /docker-entrypoint.d/50-replace-env-vars.sh
-
 
 # Expose Dashboard port
 EXPOSE 80
