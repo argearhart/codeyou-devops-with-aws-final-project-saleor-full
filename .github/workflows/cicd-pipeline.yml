@@ -24,6 +24,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry ruff pip-audit
 
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@v0.2.2
+
       - name: Linter
         run: |
           ruff check .
