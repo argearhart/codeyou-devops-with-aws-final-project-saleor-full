@@ -51,29 +51,27 @@ jobs:
         run: |
           trivy image argearhart/saleor-dashboard:${{ github.ref_name }}  || true
 
-      - name: Debug Secrets
-        run: |
-          echo "DOCKERHUB_USERNAME: '${{ secrets.DOCKERHUB_USERNAME }}'"
-          if [[ -z "${{ secrets.DOCKERHUB_USERNAME }}" ]]; then
-            echo "DOCKERHUB_USERNAME is empty!"
-            exit 1
-          fi
-          if [[ -z "${{ secrets.DOCKERHUB_PASSWORD }}" ]]; then
-            echo "DOCKERHUB_PASSWORD is empty!"
-            exit 1
-          fi
-
       - name: Push API Image to DockerHub
         if: github.ref_name == 'develop' || github.ref_name == 'staging' || github.ref_name == 'production'
         run: |
-          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-          docker push argearhart/saleor-api:${{ github.ref_name }}  || true
+          if [[ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]]; then
+            echo "❌ ERROR: DOCKERHUB_TOKEN is missing!"
+            exit 1
+          else
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "argearhart" --password-stdin
+            docker push argearhart/saleor-api:${{ github.ref_name }} || true
+          fi
 
-      - name: Push Dashboard Image to DockerHub
+      - name: Push Dashboard Image to DockerHub (Using Docker Token)
         if: github.ref_name == 'develop' || github.ref_name == 'staging' || github.ref_name == 'production'
         run: |
-          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-          docker push argearhart/saleor-dashboard:${{ github.ref_name }} || true
+          if [[ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]]; then
+          echo "❌ ERROR: DOCKERHUB_TOKEN is missing!"
+            exit 1
+          else
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "argearhart" --password-stdin
+            docker push argearhart/saleor-dashboard:${{ github.ref_name }} || true
+          fi
 
   staging-validation:
     needs: build
