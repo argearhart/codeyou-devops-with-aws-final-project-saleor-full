@@ -54,24 +54,14 @@ jobs:
       - name: Push API Image to DockerHub
         if: github.ref_name == 'develop' || github.ref_name == 'staging' || github.ref_name == 'production'
         run: |
-          if [[ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]]; then
-            echo "❌ ERROR: DOCKERHUB_TOKEN is missing!"
-            exit 1
-          else
-            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "argearhart" --password-stdin
-            docker push argearhart/saleor-api:${{ github.ref_name }} || true
-          fi
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "argearhart" --password-stdin
+          docker push argearhart/saleor-api:${{ github.ref_name }}
 
-      - name: Push Dashboard Image to DockerHub (Using Docker Token)
+      - name: Push Dashboard Image to DockerHub
         if: github.ref_name == 'develop' || github.ref_name == 'staging' || github.ref_name == 'production'
         run: |
-          if [[ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]]; then
-          echo "❌ ERROR: DOCKERHUB_TOKEN is missing!"
-            exit 1
-          else
-            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "argearhart" --password-stdin
-            docker push argearhart/saleor-dashboard:${{ github.ref_name }} || true
-          fi
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "argearhart" --password-stdin
+          docker push argearhart/saleor-dashboard:${{ github.ref_name }}
 
   staging-validation:
     needs: build
@@ -95,6 +85,18 @@ jobs:
     if: github.ref_name == 'production'
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to AWS
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy to AWS ECS
         run: |
-          echo "Deploying to AWS..."
+          echo "Updating AWS ECS Task Definition..."
+          aws ecs update-service --cluster saleor-cluster --service saleor-service --force-new-deployment
+          echo "AWS ECS deployment completed!"
