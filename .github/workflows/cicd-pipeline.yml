@@ -79,7 +79,7 @@ jobs:
           docker-compose ps
 
       - name: Stop Containers
-        run: docker-compose down
+        run: docker-compose down -v
 
   production-deploy:
     needs: [build, staging-validation]

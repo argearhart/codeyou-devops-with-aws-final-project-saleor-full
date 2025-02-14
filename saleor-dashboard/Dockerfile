@@ -1,8 +1,8 @@
 # Builder Stage
 FROM node:18-alpine AS builder
 
-RUN apk add --no-cache bash
 WORKDIR /app
+RUN apk add --no-cache bash nodejs npm
 
 # Copy dependency files
 COPY package.json package-lock.json ./
