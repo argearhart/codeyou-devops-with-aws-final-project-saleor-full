@@ -63,7 +63,7 @@ jobs:
       - name: Push API Image to DockerHub
         if: github.ref_name == 'develop' || github.ref_name == 'staging' || github.ref_name == 'production'
         run: |
-          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+          echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
           docker push argearhart/saleor-api:${{ env.IMAGE_TAG }}
           docker push argearhart/saleor-api:production
           docker push argearhart/saleor-api:latest
@@ -71,7 +71,7 @@ jobs:
       - name: Push Dashboard Image to DockerHub
         if: github.ref_name == 'develop' || github.ref_name == 'staging' || github.ref_name == 'production'
         run: |
-          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+          echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
           docker push argearhart/saleor-dashboard:${{ env.IMAGE_TAG }}
           docker push argearhart/saleor-dashboard:production
           docker push argearhart/saleor-dashboard:latest
