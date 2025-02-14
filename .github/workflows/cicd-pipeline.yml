@@ -51,6 +51,19 @@ jobs:
         run: |
           trivy image argearhart/saleor-dashboard:${{ github.ref_name }}  || true
 
+                - name: Debug Secrets
+        run: |
+          echo "DOCKERHUB_USERNAME: '${{ secrets.DOCKERHUB_USERNAME }}'"
+          if [[ -z "${{ secrets.DOCKERHUB_USERNAME }}" ]]; then
+            echo "DOCKERHUB_USERNAME is empty!"
+            exit 1
+          fi
+          if [[ -z "${{ secrets.DOCKERHUB_PASSWORD }}" ]]; then
+            echo "DOCKERHUB_PASSWORD is empty!"
+            exit 1
+          fi
+
+
       - name: Push API Image to DockerHub
         if: github.ref_name == 'develop' || github.ref_name == 'staging' || github.ref_name == 'production'
         run: |
