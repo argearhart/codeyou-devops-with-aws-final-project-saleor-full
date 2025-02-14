@@ -60,21 +60,24 @@ jobs:
         run: |
           trivy image argearhart/saleor-dashboard:${{ github.ref_name }}  || true
 
+      - name: Login to DockerHub
+        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
       - name: Push API Image to DockerHub
-        if: github.ref_name == 'develop' || github.ref_name == 'staging' || github.ref_name == 'production'
+        if: contains('develop staging production', github.ref_name)
         run: |
-          echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-          docker push argearhart/saleor-api:${{ env.IMAGE_TAG }}
-          docker push argearhart/saleor-api:production
-          docker push argearhart/saleor-api:latest
+          for tag in ${{ env.IMAGE_TAG }} production latest; do
+            docker tag argearhart/saleor-api:${{ env.IMAGE_TAG }} argearhart/saleor-api:$tag
+            docker push argearhart/saleor-api:$tag
+          done
 
       - name: Push Dashboard Image to DockerHub
-        if: github.ref_name == 'develop' || github.ref_name == 'staging' || github.ref_name == 'production'
+        if: contains('develop staging production', github.ref_name)
         run: |
-          echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-          docker push argearhart/saleor-dashboard:${{ env.IMAGE_TAG }}
-          docker push argearhart/saleor-dashboard:production
-          docker push argearhart/saleor-dashboard:latest
+          for tag in ${{ env.IMAGE_TAG }} production latest; do
+            docker tag argearhart/saleor-dashboard:${{ env.IMAGE_TAG }} argearhart/saleor-dashboard:$tag
+            docker push argearhart/saleor-dashboard:$tag
+          done
 
   staging-validation:
     needs: build
