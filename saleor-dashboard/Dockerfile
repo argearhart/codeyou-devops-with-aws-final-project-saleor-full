@@ -42,7 +42,7 @@ ENV SKIP_SOURCEMAPS=${SKIP_SOURCEMAPS:-true}
 ENV LOCALE_CODE=${LOCALE_CODE:-EN}
 
 # Build the application
-RUN npm run build
+RUN npm run build 
 
 # Runner Stage
 FROM nginx:stable-alpine AS runner
