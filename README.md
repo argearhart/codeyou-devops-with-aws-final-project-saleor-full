@@ -49,6 +49,7 @@ Follow the instructions below to get started:
 ## Supporting Documentation
 
 ### [Instructions to Deploy](Docs/Instructions-To-Deploy-Compose.md)
+
 This guide provides step-by-step instructions for setting up the Saleor platform, including:
 
 - Preparing your environment.
@@ -56,21 +57,27 @@ This guide provides step-by-step instructions for setting up the Saleor platform
 - Initializing the database and creating an admin user.
 
 ### [Instructions to Write API Dockerfile](./Docs/Instructions-To-Write-API-Dockerfile.md)
+
 This guide provides step-by-step instructions for writing the Dockerfile for the Saleor API, including:
+
 - Installing Dependencies
 - Single-stage build
 - Running the API
 
 ### [Instructions to Write Dashboard Dockerfile](./Docs/Instructions-To-Write-Dashboard-Dockerfile.md)
+
 This guide provides step-by-step instructions for writing the Dockerfile for the Saleor Dashboard, including:
+
 - Installing Dependencies
 - Multi-stage builds
 - Running the Saleor Dashboard
 
 ### [Instructions to Build CI/CD Pipelines](./Docs/Instructions-To-Build-CICD-Pipelines.md)
+
 This guide serves as a instructions and requirements for how your CI/CD Pipelines should be built and what outcome they should achieve.
 
 ### [Saleor Platform Documentation](Docs/Saleor-Platform-docs.md)
+
 Detailed documentation on:
 
 - Service configurations.
@@ -78,6 +85,7 @@ Detailed documentation on:
 - Troubleshooting common issues.
 
 ### [Saleor Overview](Saleor.md)
+
 Learn more about the Saleor project, including:
 
 - Features and capabilities.
@@ -94,3 +102,4 @@ If you encounter issues or have suggestions for improvement, please message me o
 
 Happy deploying! 🚀
 
+Updating readme.md to push - testing github secrets
