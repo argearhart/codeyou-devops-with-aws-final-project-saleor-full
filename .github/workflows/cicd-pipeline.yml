@@ -91,15 +91,21 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+          sudo apt-get install -y docker-compose
+
       - name: Validate Docker Compose
         run: |
-          set - e
-          docker-compose up -d 
+          set -e
+          docker compose up -d 
           sleep 10  
-          docker-compose ps
+          docker compose ps
 
       - name: Stop Containers
-        run: docker-compose down -v
+        run: docker compose down -v
 
   production-deploy:
     needs: [build, staging-validation]
