@@ -104,7 +104,6 @@ jobs:
           docker compose up -d 
           sleep 10  
           docker compose ps
-          docker compose ps
 
       - name: Stop Containers
         run: docker compose down -v
