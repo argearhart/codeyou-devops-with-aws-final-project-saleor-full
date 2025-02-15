@@ -123,8 +123,13 @@ jobs:
 
       - name: AWS Task Definition
         run: |
-          TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition Saleor-task-Amanda-Gearhart)  
-          NEW_TASK_DEF=$(echo "$TASK_DEFINITION" | jq --arg IMAGE_API "argearhart/saleor-api:latest" --arg IMAGE_DASHBOARD "argearhart/saleor-dashboard:latest" '.taskDefinition | { family, containerDefinitions: (.containerDefinitions | map(if .name == "saleor-api" then .image=$IMAGE_API elif .name == "saleor-dashboard" then .image=$IMAGE_DASHBOARD else . end))}')
+          TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition Saleor-task-Amanda-Gearhart)
+
+          NEW_TASK_DEF=$(echo "$TASK_DEFINITION" | jq --arg IMAGE_API "argearhart/saleor-api:latest" \
+          --arg IMAGE_DASHBOARD "argearhart/saleor-dashboard:latest" \
+          '.taskDefinition | {family, containerDefinitions: (.containerDefinitions | map(if .name == "saleor-api" then .image=$IMAGE_API elif .name == "saleor-dashboard" then 
+          .image=$IMAGE_DASHBOARD | .memory=512  else . end))}')
+
           echo "$NEW_TASK_DEF" > new-task-def.json
           aws ecs register-task-definition --cli-input-json file://new-task-def.json
 
