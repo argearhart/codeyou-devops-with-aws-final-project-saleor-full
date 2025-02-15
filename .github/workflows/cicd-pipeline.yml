@@ -67,7 +67,7 @@ jobs:
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Push API Image to DockerHub
-        if: startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/staging') || startsWith(github.ref, 'refs/heads/production')
+        if: github.ref_name == 'develop' || github.ref_name == 'staging' || github.ref_name == 'production'
         run: |
           IMAGE_TAG=${{ env.IMAGE_TAG }}
           for tag in $IMAGE_TAG production latest; do
@@ -76,7 +76,7 @@ jobs:
           done
 
       - name: Push Dashboard Image to DockerHub
-        if: contains('develop staging production', github.ref_name)
+        if: github.ref_name == 'develop' || github.ref_name == 'staging' || github.ref_name == 'production'
         run: |
           for tag in ${{ env.IMAGE_TAG }} production latest; do
             docker tag argearhart/saleor-dashboard:${{ env.IMAGE_TAG }} argearhart/saleor-dashboard:$tag
@@ -85,7 +85,7 @@ jobs:
 
   staging-validation:
     needs: build
-    if: github.ref_name == 'staging'
+    if: github.ref_name == 'production'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -107,7 +107,7 @@ jobs:
         run: docker compose down -v
 
   production-deploy:
-    needs: [build, staging-validation]
+    needs: build
     if: github.ref_name == 'production'
     runs-on: ubuntu-latest
     steps:
