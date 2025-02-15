@@ -114,10 +114,17 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: us-east-2
 
-    #  - name: Deploy to AWS ECS
-    #   run: |
-    #    echo "Updating AWS ECS Task Definition..."
-    #   aws ecs update-service --cluster saleor-cluster --service saleor-service --force-new-deployment
-    #  echo "AWS ECS deployment completed!"
+      - name: AWS Task Definition
+        run: |
+          TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition Saleor-task-Amanda-Gearhart)  # ✅ Task definition
+          NEW_TASK_DEF=$(echo "$TASK_DEFINITION" | jq --arg IMAGE_API "argearhart/saleor-api:latest" --arg IMAGE_DASHBOARD "argearhart/saleor-dashboard:latest" '.taskDefinition | { family, containerDefinitions: (.containerDefinitions | map(if .name == "saleor-api" then .image=$IMAGE_API elif .name == "saleor-dashboard" then .image=$IMAGE_DASHBOARD else . end))}')
+          echo "$NEW_TASK_DEF" > new-task-def.json
+          aws ecs register-task-definition --cli-input-json file://new-task-def.json
+
+      - name: Update ECS Service
+        run: |
+          echo "Updating AWS ECS Service..."
+          aws ecs update-service --cluster Saleor-Cluster-Amanda-Gearhart --service Saleor-tasks-gearhart-2 --force-new-deployment  # ✅ Correct cluster & service name
+          echo "AWS ECS deployment completed!"
