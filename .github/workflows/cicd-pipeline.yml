@@ -54,20 +54,21 @@ jobs:
 
       - name: Trivy Security Scan for API
         run: |
-          trivy image argearhart/saleor-api:${{ github.ref_name }} || true
+          trivy image argearhart/saleor-api:${{ env.IMAGE_TAG }} || true
 
       - name: Trivy Security Scan for Dashboard
         run: |
-          trivy image argearhart/saleor-dashboard:${{ github.ref_name }}  || true
+          trivy image argearhart/saleor-dashboard:${{ env.IMAGE_TAG }}  || true
 
       - name: Login to DockerHub
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: Push API Image to DockerHub
-        if: contains('develop staging production', github.ref_name)
+        if: startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/staging') || startsWith(github.ref, 'refs/heads/production')
         run: |
-          for tag in ${{ env.IMAGE_TAG }} production latest; do
-            docker tag argearhart/saleor-api:${{ env.IMAGE_TAG }} argearhart/saleor-api:$tag
+          IMAGE_TAG=${{ env.IMAGE_TAG }}
+          for tag in $IMAGE_TAG production latest; do
+            docker tag argearhart/saleor-api:$IMAGE_TAG argearhart/saleor-api:$tag
             docker push argearhart/saleor-api:$tag
           done
 
@@ -89,12 +90,13 @@ jobs:
 
       - name: Validate Docker Compose
         run: |
-          docker-compose up -d || true
+          set - e
+          docker-compose up -d 
           sleep 10  
-          docker-compose ps || true
+          docker-compose ps
 
       - name: Stop Containers
-        run: docker-compose down -v || true
+        run: docker-compose down -v
 
   production-deploy:
     needs: [build, staging-validation]
@@ -111,8 +113,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Deploy to AWS ECS
-        run: |
-          echo "Updating AWS ECS Task Definition..."
-          aws ecs update-service --cluster saleor-cluster --service saleor-service --force-new-deployment
-          echo "AWS ECS deployment completed!"
+    #  - name: Deploy to AWS ECS
+    #   run: |
+    #    echo "Updating AWS ECS Task Definition..."
+    #   aws ecs update-service --cluster saleor-cluster --service saleor-service --force-new-deployment
+    #  echo "AWS ECS deployment completed!"
