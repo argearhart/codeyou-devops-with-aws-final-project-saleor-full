@@ -107,7 +107,7 @@ jobs:
         run: docker compose down -v
 
   production-deploy:
-    needs: build
+    needs: staging-validation
     if: github.ref_name == 'production'
     runs-on: ubuntu-latest
     steps:
