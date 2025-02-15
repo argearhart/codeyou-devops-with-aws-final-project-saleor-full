@@ -100,8 +100,6 @@ jobs:
         run: |
           set -e
           docker compose up -d 
-          set -e
-          docker compose up -d 
           sleep 10  
           docker compose ps
 
